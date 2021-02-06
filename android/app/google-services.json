@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "351486471620",
+    "project_id": "loginmemo-c12d2",
+    "storage_bucket": "loginmemo-c12d2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:351486471620:android:b6a179bbf82e55124a4891",
+        "android_client_info": {
+          "package_name": "com.loginmemo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "351486471620-2ie6agdth9lr18mmpufihnc07o4u17m7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdZZrG1PqiYfBnKdYXrVoV550lOeAFAsA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "351486471620-2ie6agdth9lr18mmpufihnc07o4u17m7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
