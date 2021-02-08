@@ -2,8 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class AddUser extends StatefulWidget {
+  final String docId ;
+
+  const AddUser({Key key, this.docId}) : super(key: key);
   @override
   _AddUserState createState() => _AddUserState();
+
 }
 
 class _AddUserState extends State<AddUser> {
@@ -19,11 +23,37 @@ class _AddUserState extends State<AddUser> {
         "age": age.text.trim()
       };
       colRef
-          .add(doc).then((doc) {
-            print(doc);
+          .add(doc).then((val) {
+            print(val);
 
       });
   }
+  _handleEdit() {
+    Map<String , dynamic> doc = {
+      "name": username.text.trim(),
+      "age": age.text.trim()
+    };
+    colRef
+        .doc(widget.docId)
+        .update(doc).then((val) {
+          print('success update');
+    });
+  }
+
+  @override
+  void initState() {
+    if(widget.docId !=null) {
+        colRef.doc(widget.docId).get()
+            .then((doc) {
+              if(doc.exists) {
+                username.text = doc.data()['name'];
+                age.text = doc.data()['age'];
+              }
+        });
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,7 +114,7 @@ class _AddUserState extends State<AddUser> {
                   )
               ),
             ),
-            OutlineButton(onPressed: !isValidate ? null :_addDoc,child: Text("Save user"),)
+            OutlineButton(onPressed: !isValidate ? null : widget.docId != null ? _handleEdit : _addDoc,child: Text("Save user"),)
           ],
         ),
       ),

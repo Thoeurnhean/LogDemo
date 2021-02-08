@@ -46,7 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
           }) : null,
           backgroundColor: Colors.orange,actions: [
            isEditMode ? IconButton(icon: Icon(Icons.delete), onPressed: _handleRemove) : Container(),
-           !isEditMode ? Container() :  selectedIds.length == 1 ? IconButton(icon: Icon(Icons.edit), onPressed: (){}) : Container()
+           !isEditMode ? Container() :  selectedIds.length == 1 ? IconButton(icon: Icon(Icons.edit), onPressed: (){
+             Navigator.push(context, MaterialPageRoute(builder: (_) => AddUser(docId: selectedIds[0] ,)));
+           }) : Container()
         ],),
         body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance.collection('user').snapshots(),
