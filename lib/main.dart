@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'homeScreen.dart';
+import 'login.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -15,28 +18,52 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    Firebase.initializeApp().then((value) {
+      Future.delayed(Duration(seconds: 2), () {
+        setState(() {
+          isLoading = false;
+        });
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder(
-        future: _initialization,
-        builder: (context, snapshot) {
-          //If it has error
-          if (snapshot.hasError) {
-            print('Error');
-          }
-
-          // Once complete, show your application
-          if (snapshot.connectionState == ConnectionState.done) {
-            return HomeScreen();
-          }
-
-          // Otherwise, show something whilst waiting for initialization to complete
-          return Center(child: CircularProgressIndicator());
-        },
-      ),
+      body: isLoading
+          ? Center(
+              child: Text(
+                "Loading",
+                style: TextStyle(color: Colors.black),
+              ),
+            )
+          : StreamBuilder(
+              initialData: null,
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: Text(
+                      "Loading your data....",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.active) {
+                  if (snapshot.hasData) {
+                    return HomeScreen();
+                  } else {
+                    return Login();
+                  }
+                }
+                return Container();
+              },
+            ),
     );
   }
 }

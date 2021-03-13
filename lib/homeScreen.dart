@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loginMemo/add_user.dart';
@@ -13,6 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isEditMode = false;
   List<String> selectedIds = [];
   CollectionReference col = FirebaseFirestore.instance.collection('user');
+
   Widget toggleActive(docId) {
     if (selectedIds.contains(docId)) {
       return Icon(CupertinoIcons.check_mark_circled_solid);
@@ -31,12 +33,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    User user = FirebaseAuth.instance.currentUser;
     return Scaffold(
         floatingActionButton: FloatingActionButton(onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
             return AddUser();
           }));
         }),
+        drawer: Drawer(
+          child: ListView(
+            children: [
+              UserAccountsDrawerHeader(
+                accountName: Text("${user.uid}"),
+                accountEmail: Text("${user.email}"),
+              ),
+              ListTile(
+                title: Text("Logout"),
+                onTap: () => FirebaseAuth.instance.signOut(),
+              )
+            ],
+          ),
+        ),
         appBar: AppBar(
           leading: isEditMode
               ? IconButton(
@@ -83,46 +100,49 @@ class _HomeScreenState extends State<HomeScreen> {
           stream: FirebaseFirestore.instance.collection('user').snapshots(),
           builder: (context, snapshot) {
             return ListView.builder(
-              itemCount: snapshot.data.docs.length,
+              itemCount: snapshot.hasData ? snapshot.data.docs.length : 0,
               itemBuilder: (context, indext) {
-                var doc = snapshot.data.docs[indext];
+                if (snapshot.hasData) {
+                  var doc = snapshot.data.docs[indext];
 
-                return Column(
-                  children: [
-                    InkWell(
-                      onTap: !isEditMode
-                          ? null
-                          : () {
-                              setState(() {
-                                if (selectedIds.contains(doc.id)) {
-                                  selectedIds.remove(doc.id);
-                                  if (selectedIds.length == 0) {
-                                    isEditMode = false;
+                  return Column(
+                    children: [
+                      InkWell(
+                        onTap: !isEditMode
+                            ? null
+                            : () {
+                                setState(() {
+                                  if (selectedIds.contains(doc.id)) {
+                                    selectedIds.remove(doc.id);
+                                    if (selectedIds.length == 0) {
+                                      isEditMode = false;
+                                    }
+                                  } else {
+                                    selectedIds.add(doc.id);
                                   }
-                                } else {
-                                  selectedIds.add(doc.id);
-                                }
-                              });
-                            },
-                      onLongPress: () {
-                        setState(() {
-                          isEditMode = true;
-                          selectedIds.add(doc.id);
-                        });
-                      },
-                      child: ListTile(
-                        leading: isEditMode
-                            ? selectedIds.contains(doc.id)
-                                ? Icon(Icons.check_circle)
-                                : Icon(CupertinoIcons.circle)
-                            : null,
-                        title: Text(doc['name']),
-                        subtitle: Text(doc['age']),
+                                });
+                              },
+                        onLongPress: () {
+                          setState(() {
+                            isEditMode = true;
+                            selectedIds.add(doc.id);
+                          });
+                        },
+                        child: ListTile(
+                          leading: isEditMode
+                              ? selectedIds.contains(doc.id)
+                                  ? Icon(Icons.check_circle)
+                                  : Icon(CupertinoIcons.circle)
+                              : null,
+                          title: Text(doc['name']),
+                          subtitle: Text(doc['age']),
+                        ),
                       ),
-                    ),
-                    Divider()
-                  ],
-                );
+                      Divider()
+                    ],
+                  );
+                }
+                return Container();
               },
             );
           },
@@ -138,7 +158,8 @@ class CustomSearchDelegate extends SearchDelegate {
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
-      IconButton(icon: Icon(Icons.search), onPressed: () => showResults(context)),
+      IconButton(
+          icon: Icon(Icons.search), onPressed: () => showResults(context)),
       IconButton(
           icon: Icon(Icons.clear),
           onPressed: () {
